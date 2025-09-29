@@ -21,7 +21,7 @@ provider:
 
 functions:
   binanceOrder:
-    handler: BinanceOrderHandler
+    handler: com.blackchain.BinanceOrderHandler::handleRequest
     events:
       - http:
           path: /orders

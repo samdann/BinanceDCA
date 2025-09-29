@@ -34,7 +34,7 @@
       },
       "functions": {
         "binanceOrder": {
-          "handler": "BinanceOrderHandler",
+          "handler": "com.blackchain.BinanceOrderHandler::handleRequest",
           "events": [
             {
               "http": {
@@ -103,7 +103,7 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: binance-order-service\n\nprovider:\n  name: aws\n  runtime: java17\n  region: eu-central-1\n  stage: ${opt:stage, 'dev'}\n  memorySize: 512\n  environment:\n    BINANCE_API_KEY: ${env:BINANCE_API_KEY}\n    BINANCE_API_SECRET: ${env:BINANCE_API_SECRET}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - logs:CreateLogGroup\n            - logs:CreateLogStream\n            - logs:PutLogEvents\n          Resource: \"*\"\n\nfunctions:\n  binanceOrder:\n    handler: BinanceOrderHandler\n    events:\n      - http:\n          path: /orders\n          method: post\n          cors: true\n      - http:\n          path: /orders\n          method: get\n          cors: true\n\npackage:\n  artifact: build/libs/${self:service}-1.0.0-all.jar\n\nplugins:\n  - serverless-offline\n\ncustom:\n  serverless-offline:\n    httpPort: 3000",
+    "serviceRawFile": "service: binance-order-service\n\nprovider:\n  name: aws\n  runtime: java17\n  region: eu-central-1\n  stage: ${opt:stage, 'dev'}\n  memorySize: 512\n  environment:\n    BINANCE_API_KEY: ${env:BINANCE_API_KEY}\n    BINANCE_API_SECRET: ${env:BINANCE_API_SECRET}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - logs:CreateLogGroup\n            - logs:CreateLogStream\n            - logs:PutLogEvents\n          Resource: \"*\"\n\nfunctions:\n  binanceOrder:\n    handler: com.blackchain.BinanceOrderHandler::handleRequest\n    events:\n      - http:\n          path: /orders\n          method: post\n          cors: true\n      - http:\n          path: /orders\n          method: get\n          cors: true\n\npackage:\n  artifact: build/libs/${self:service}-1.0.0-all.jar\n\nplugins:\n  - serverless-offline\n\ncustom:\n  serverless-offline:\n    httpPort: 3000",
     "command": [
       "info"
     ],
@@ -118,12 +118,12 @@
     "serviceProviderAwsCfStackName": "binance-order-service-prod",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:eu-central-1:660416467304:stack/binance-order-service-prod/f7ca80c0-9d30-11f0-8235-0a91727df95b",
     "serviceProviderAwsCfStackCreated": "2025-09-29T12:36:49.378Z",
-    "serviceProviderAwsCfStackUpdated": null,
-    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
+    "serviceProviderAwsCfStackUpdated": "2025-09-29T15:19:52.840Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "BinanceOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:eu-central-1:660416467304:function:binance-order-service-prod-binanceOrder:1",
+        "OutputValue": "arn:aws:lambda:eu-central-1:660416467304:function:binance-order-service-prod-binanceOrder:3",
         "Description": "Current Lambda function version",
         "ExportName": "sls-binance-order-service-prod-BinanceOrderLambdaFunctionQualifiedArn"
       },

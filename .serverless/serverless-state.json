@@ -126,9 +126,9 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-eu-central-1-efb3106b-5fc6",
-                "S3Key": "serverless/binance-order-service/prod/1759149402415-2025-09-29T12:36:42.415Z/binance-order-service-1.0.0-all.jar"
+                "S3Key": "serverless/binance-order-service/prod/1759159186839-2025-09-29T15:19:46.839Z/binance-order-service-1.0.0-all.jar"
               },
-              "Handler": "BinanceOrderHandler",
+              "Handler": "com.blackchain.BinanceOrderHandler::handleRequest",
               "Runtime": "java17",
               "FunctionName": "binance-order-service-prod-binanceOrder",
               "MemorySize": 512,
@@ -150,14 +150,14 @@
               "BinanceOrderLogGroup"
             ]
           },
-          "BinanceOrderLambdaVersionoqlHpTLQsiFInPDM0znPHZM7PcrbDMxcIAHILAwgPao": {
+          "BinanceOrderLambdaVersionNQHjA4lAAIRYxinVFbARDDhqLfZDpQagH8xfIwFuM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "BinanceOrderLambdaFunction"
               },
-              "CodeSha256": "D3KFswYBPBgt7sj0sxr5XDLll87bhMq7kU0Njvnc15U="
+              "CodeSha256": "yX+S3NVoRLNf6adqaF0qr6DOal4pDglAHsamF1KDoCM="
             }
           },
           "ApiGatewayRestApi": {
@@ -324,7 +324,7 @@
               "BinanceOrderLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1759149396895": {
+          "ApiGatewayDeployment1759159181399": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -386,7 +386,7 @@
           "BinanceOrderLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "BinanceOrderLambdaVersionoqlHpTLQsiFInPDM0znPHZM7PcrbDMxcIAHILAwgPao"
+              "Ref": "BinanceOrderLambdaVersionNQHjA4lAAIRYxinVFbARDDhqLfZDpQagH8xfIwFuM"
             },
             "Export": {
               "Name": "sls-binance-order-service-prod-BinanceOrderLambdaFunctionQualifiedArn"
@@ -433,7 +433,7 @@
     "pluginsData": {},
     "functions": {
       "binanceOrder": {
-        "handler": "BinanceOrderHandler",
+        "handler": "com.blackchain.BinanceOrderHandler::handleRequest",
         "events": [
           {
             "http": {
@@ -490,7 +490,7 @@
         "timeout": 6,
         "runtime": "java17",
         "vpc": {},
-        "versionLogicalId": "BinanceOrderLambdaVersionoqlHpTLQsiFInPDM0znPHZM7PcrbDMxcIAHILAwgPao"
+        "versionLogicalId": "BinanceOrderLambdaVersionNQHjA4lAAIRYxinVFbARDDhqLfZDpQagH8xfIwFuM"
       }
     },
     "configValidationMode": "warn",
@@ -507,7 +507,7 @@
         "artifact": "build/libs/binance-order-service-1.0.0-all.jar",
         "artifactsS3KeyDirname": "serverless/binance-order-service/prod/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-eu-central-1-efb3106b-5fc6",
-        "artifactDirectoryName": "serverless/binance-order-service/prod/1759149402415-2025-09-29T12:36:42.415Z"
+        "artifactDirectoryName": "serverless/binance-order-service/prod/1759159186839-2025-09-29T15:19:46.839Z"
       },
       "plugins": {
         "$ref": "$[\"service\"][\"plugins\"]"
@@ -521,7 +521,7 @@
     "layers": {}
   },
   "package": {
-    "artifactDirectoryName": "serverless/binance-order-service/prod/1759149402415-2025-09-29T12:36:42.415Z",
+    "artifactDirectoryName": "serverless/binance-order-service/prod/1759159186839-2025-09-29T15:19:46.839Z",
     "artifact": "binance-order-service-1.0.0-all.jar"
   }
 }

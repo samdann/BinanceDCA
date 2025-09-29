@@ -4,11 +4,17 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.blackchain.domain.BinanceOrder
+import com.blackchain.domain.Order
+import com.blackchain.domain.OrderStatus
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.http4k.client.OkHttp
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.http4k.core.*
 import dev.forkhandles.result4k.*
+import org.http4k.client.OkHttp
+import org.http4k.core.*
+import org.http4k.core.Body
+import org.http4k.format.Jackson.auto
+import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 import javax.crypto.Mac
@@ -25,6 +31,9 @@ private const val HMAC_SHA_256 = "HmacSHA256"
 private const val EQUALS_SIGN_STRING = "?"
 private const val EQUALS_STRING = "="
 private const val AND_STRING = "&"
+
+//Lenses
+val binanceOrdersLens = Body.auto<List<BinanceOrder>>().toLens()
 
 // Data classes
 data class CreateOrderRequest(
@@ -51,6 +60,7 @@ data class BinanceOrderResponse(
     val type: String,
     val side: String
 )
+
 
 sealed class CryptoTrackerError {
     data class BinanceError(val message: String) : CryptoTrackerError()
@@ -168,7 +178,7 @@ class BinanceService(private val binanceClient: HttpHandler) {
         }
     }
 
-    fun getOrdersBySymbol(symbol: String): Result4k<List<BinanceOrderResponse>, CryptoTrackerError> {
+    fun getOrdersBySymbol(symbol: String): Result4k<List<Order>, CryptoTrackerError> {
         val method = Method.GET
         val params = mutableMapOf<String, String>()
         params["symbol"] = symbol
@@ -179,10 +189,7 @@ class BinanceService(private val binanceClient: HttpHandler) {
         return when (response.status) {
             Status.OK -> {
                 try {
-                    val orderResponses = ObjectMapper().registerKotlinModule()
-                        .readValue(response.bodyString(), Array<BinanceOrderResponse>::class.java)
-                        .toList()
-                    Success(orderResponses)
+                    Success(toOrders(binanceOrdersLens(response)))
                 } catch (e: Exception) {
                     Failure(CryptoTrackerError.BinanceError("Failed to parse response: ${e.message}"))
                 }
@@ -243,4 +250,39 @@ fun loadProperty(propertyName: String): String {
 // Helper function to convert bytes to hex (replace your Hex.hex() function)
 fun bytesToHex(bytes: ByteArray): String {
     return bytes.joinToString("") { "%02x".format(it) }
+}
+
+fun toOrders(binanceOrders: List<BinanceOrder>): List<Order> {
+    return binanceOrders.map { input ->
+        //val time = if (input.executionTime != input.executionTime) input.executionTime else input.creationTime
+        val order = Order(
+            input.orderId,
+            input.executionTime,
+            input.symbol,
+            input.type,
+            input.side,
+            input.quantity,
+            input.price,
+            input.totalValue,
+            BigDecimal.valueOf(0.0),
+            feeAsset = "",
+            getStatus(input.status.lowercase()),
+            priceFromTrades = false,
+            mutableListOf(),
+            manualImport = false
+        )
+        if (input.status == "PARTIALLY_CANCELED") {
+            order.quantity = input.executedQty
+        }
+        order
+    }
+}
+
+private fun getStatus(input: String): OrderStatus {
+    return when (input) {
+        "filled" -> OrderStatus.FILLED
+        "new" -> OrderStatus.NEW
+        "partially_canceled" -> OrderStatus.PARTIALLY_CANCELED
+        else -> OrderStatus.CANCELED
+    }
 }
