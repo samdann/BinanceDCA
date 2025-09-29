@@ -79,20 +79,34 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
     private val objectMapper = ObjectMapper().registerKotlinModule()
     private val binanceClient = OkHttp()
     private val binanceService = BinanceService(binanceClient)
+    private lateinit var context: Context
 
     override fun handleRequest(
         input: APIGatewayProxyRequestEvent,
         context: Context
     ): APIGatewayProxyResponseEvent {
 
+        this.context = context
+
         return try {
+            context.logger.log("Received ${input.httpMethod} request to ${input.path}")
+
             when (input.httpMethod) {
                 "POST" -> handleCreateOrder(input)
                 "GET" -> handleGetOrders(input)
                 else -> createErrorResponse(405, "Method not allowed")
             }
         } catch (e: Exception) {
-            context.logger.log("Error: ${e.message}")
+            // Log full stack trace for debugging
+            context.logger.log("ERROR: ${e.javaClass.name}: ${e.message}")
+            context.logger.log("Stack trace: ${e.stackTraceToString()}")
+
+            // Log the cause if it exists
+            e.cause?.let { cause ->
+                context.logger.log("Caused by: ${cause.javaClass.name}: ${cause.message}")
+                context.logger.log("Cause stack trace: ${cause.stackTraceToString()}")
+            }
+
             createErrorResponse(500, "Internal server error: ${e.message}")
         }
     }
@@ -116,8 +130,10 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         val symbol = input.queryStringParameters?.get("symbol")
             ?: return createErrorResponse(400, "Symbol parameter is required")
 
-        return when (val result = binanceService.getOrdersBySymbol(symbol)) {
-            is Success -> createSuccessResponse(result.value)
+        val result = binanceService.getOrdersBySymbol(symbol)
+        println(result.valueOrNull())
+        return when (result) {
+            is Success -> createSuccessResponse(result.valueOrNull())
             is Failure -> createErrorResponse(400, result.reason.toString())
         }
     }
