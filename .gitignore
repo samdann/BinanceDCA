@@ -6,6 +6,8 @@ build/
 
 ### Specific files ###
 .env
+.serverless/
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
@@ -48,4 +50,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
->>>>>>> ea40dbc (initial version: lambda handler, cloudformattion template and build file)
