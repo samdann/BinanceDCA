@@ -1,0 +1,43 @@
+service: binance-order-service
+
+provider:
+  name: aws
+  runtime: java17
+  region: eu-central-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 512
+  environment:
+    BINANCE_API_KEY: ${env:BINANCE_API_KEY}
+    BINANCE_API_SECRET: ${env:BINANCE_API_SECRET}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+functions:
+  binanceOrder:
+    handler: BinanceOrderHandler
+    events:
+      - http:
+          path: /orders
+          method: post
+          cors: true
+      - http:
+          path: /orders
+          method: get
+          cors: true
+
+package:
+  artifact: build/libs/${self:service}-1.0.0-all.jar
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000

@@ -1,0 +1,143 @@
+{
+  "/Users/samdann/Documents/workspace/backend/BinanceDCA/serverless.yml": {
+    "versionFramework": "4.19.1",
+    "servicePath": "/Users/samdann/Documents/workspace/backend/BinanceDCA/serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "binance-order-service",
+      "provider": {
+        "name": "aws",
+        "runtime": "java17",
+        "region": "eu-central-1",
+        "stage": "prod",
+        "memorySize": 512,
+        "environment": {
+          "BINANCE_API_KEY": "<REDACTED>",
+          "BINANCE_API_SECRET": "<REDACTED>"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        },
+        "versionFunctions": true
+      },
+      "functions": {
+        "binanceOrder": {
+          "handler": "BinanceOrderHandler",
+          "events": [
+            {
+              "http": {
+                "path": "/orders",
+                "method": "post",
+                "cors": true
+              }
+            },
+            {
+              "http": {
+                "path": "/orders",
+                "method": "get",
+                "cors": true
+              }
+            }
+          ],
+          "name": "binance-order-service-prod-binanceOrder"
+        }
+      },
+      "package": {
+        "artifact": "build/libs/binance-order-service-1.0.0-all.jar",
+        "artifactsS3KeyDirname": "serverless/binance-order-service/prod/code-artifacts"
+      },
+      "plugins": [
+        "serverless-offline"
+      ],
+      "custom": {
+        "serverless-offline": {
+          "httpPort": 3000
+        }
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "java17",
+      "region": "eu-central-1",
+      "stage": "prod",
+      "memorySize": 512,
+      "environment": {
+        "BINANCE_API_KEY": "<REDACTED>",
+        "BINANCE_API_SECRET": "<REDACTED>"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "versionFunctions": true
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "service: binance-order-service\n\nprovider:\n  name: aws\n  runtime: java17\n  region: eu-central-1\n  stage: ${opt:stage, 'dev'}\n  memorySize: 512\n  environment:\n    BINANCE_API_KEY: ${env:BINANCE_API_KEY}\n    BINANCE_API_SECRET: ${env:BINANCE_API_SECRET}\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - logs:CreateLogGroup\n            - logs:CreateLogStream\n            - logs:PutLogEvents\n          Resource: \"*\"\n\nfunctions:\n  binanceOrder:\n    handler: BinanceOrderHandler\n    events:\n      - http:\n          path: /orders\n          method: post\n          cors: true\n      - http:\n          path: /orders\n          method: get\n          cors: true\n\npackage:\n  artifact: build/libs/${self:service}-1.0.0-all.jar\n\nplugins:\n  - serverless-offline\n\ncustom:\n  serverless-offline:\n    httpPort: 3000",
+    "command": [
+      "info"
+    ],
+    "options": {
+      "stage": "prod"
+    },
+    "orgId": "62101321-d34e-40ea-8c6e-b01e92b754f5",
+    "orgName": "blackchain",
+    "userId": "z2vv1pDjGgyYgJ8vm2",
+    "userName": "blackchain",
+    "serviceProviderAwsAccountId": "660416467304",
+    "serviceProviderAwsCfStackName": "binance-order-service-prod",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:eu-central-1:660416467304:stack/binance-order-service-prod/f7ca80c0-9d30-11f0-8235-0a91727df95b",
+    "serviceProviderAwsCfStackCreated": "2025-09-29T12:36:49.378Z",
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "BinanceOrderLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:eu-central-1:660416467304:function:binance-order-service-prod-binanceOrder:1",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-binance-order-service-prod-BinanceOrderLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServiceEndpoint",
+        "OutputValue": "https://m0puqpn9d1.execute-api.eu-central-1.amazonaws.com/prod",
+        "Description": "URL of the service endpoint",
+        "ExportName": "sls-binance-order-service-prod-ServiceEndpoint"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-eu-central-1-efb3106b-5fc6",
+        "ExportName": "sls-binance-order-service-prod-ServerlessDeploymentBucketName"
+      }
+    ]
+  }
+}
