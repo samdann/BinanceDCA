@@ -3,22 +3,26 @@ package com.blackchain.adapters
 import com.blackchain.BinanceOrderResponse
 import com.blackchain.CreateOrderRequest
 import com.blackchain.CryptoTrackerError
+import com.blackchain.adapters.domain.BinanceOrder
 import com.blackchain.adapters.domain.Order
 import com.blackchain.adapters.domain.toOrders
-import com.blackchain.binanceOrdersLens
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
+import org.http4k.core.Body
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Status
+import org.http4k.format.Jackson.auto
 
 // Constants
-
 private const val BINANCE_ORDER_PATH = "/api/v3/order"
 private const val BINANCE_ORDERS_PATH = "/api/v3/allOrders"
+
+//Lenses
+val binanceOrdersLens = Body.auto<List<BinanceOrder>>().toLens()
 
 // Binance Service
 class BinanceService(private val binanceClient: HttpHandler) {

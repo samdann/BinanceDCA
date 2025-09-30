@@ -5,22 +5,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.blackchain.adapters.BinanceService
-import com.blackchain.adapters.domain.BinanceOrder
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.*
 import org.http4k.client.OkHttp
-import org.http4k.core.Body
-import org.http4k.format.Jackson.auto
 
-// Constants
-private const val HMAC_SHA_256 = "HmacSHA256"
-private const val EQUALS_SIGN_STRING = "?"
-private const val EQUALS_STRING = "="
-private const val AND_STRING = "&"
-
-//Lenses
-val binanceOrdersLens = Body.auto<List<BinanceOrder>>().toLens()
 
 // Data classes
 data class CreateOrderRequest(

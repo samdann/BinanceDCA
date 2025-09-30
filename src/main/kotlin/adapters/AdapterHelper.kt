@@ -3,6 +3,7 @@ package com.blackchain.adapters
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Request.Companion.invoke
+import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 import javax.crypto.Mac
@@ -44,9 +45,29 @@ fun buildSignature(secret: String, message: String): String {
     }
 }
 
+
 fun loadProperty(propertyName: String): String {
-    return System.getenv(propertyName)
-        ?: throw RuntimeException("Missing environment variable: $propertyName")
+    val envVars = loadEnvironmentVariables()
+    return envVars[propertyName] ?: throw Exception("Missing variable $propertyName")
+
+}
+
+fun loadEnvironmentVariables(): Map<String, String> {
+    val envVars = System.getenv().toMutableMap()
+
+    // Check if we are running locally (check for .env file)
+    val envFile = File(".env")
+    if (envFile.exists()) {
+        envFile.forEachLine { line ->
+            val trimmedLine = line.trim()
+            if (trimmedLine.isNotEmpty() && !trimmedLine.startsWith("#")) {
+                val (key, value) = trimmedLine.split("=")
+                envVars[key.trim()] = value.trim()
+            }
+        }
+    }
+
+    return envVars
 }
 
 // Helper function to convert bytes to hex (replace your Hex.hex() function)
@@ -67,6 +88,14 @@ fun buildRequest(
     requestParams["signature"] = signature
 
     val requestUrl = BINANCE_BASE_URL + requestPath + addQueryParams(requestParams)
+
+    return Request(method, requestUrl)
+        .header("Content-Type", "application/json; charset=utf-8")
+        .header("X-MBX-APIKEY", binanceApiKey)
+}
+
+fun buildPublicRequest(method: Method, fullRequestURL: String, requestParams: MutableMap<String, String>): Request {
+    val requestUrl = fullRequestURL + addQueryParams(requestParams)
 
     return Request(method, requestUrl)
         .header("Content-Type", "application/json; charset=utf-8")
