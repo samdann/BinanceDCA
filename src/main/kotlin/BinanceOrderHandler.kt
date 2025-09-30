@@ -4,29 +4,16 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
-import com.blackchain.domain.BinanceOrder
-import com.blackchain.domain.Order
-import com.blackchain.domain.OrderStatus
+import com.blackchain.adapters.BinanceService
+import com.blackchain.adapters.domain.BinanceOrder
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.*
 import org.http4k.client.OkHttp
-import org.http4k.core.*
 import org.http4k.core.Body
 import org.http4k.format.Jackson.auto
-import java.math.BigDecimal
-import java.nio.charset.StandardCharsets
-import java.util.stream.Collectors
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 // Constants
-private const val BINANCE_API_KEY = "BINANCE_API_KEY"
-private const val BINANCE_API_SECRET = "BINANCE_API_SECRET"
-private const val BINANCE_BASE_URL = "https://api.binance.com"
-private const val BINANCE_ORDER_PATH = "/api/v3/order"
-private const val BINANCE_ORDERS_PATH = "/api/v3/allOrders"
-
 private const val HMAC_SHA_256 = "HmacSHA256"
 private const val EQUALS_SIGN_STRING = "?"
 private const val EQUALS_STRING = "="
@@ -155,150 +142,4 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
     }
 }
 
-// Binance Service
-class BinanceService(private val binanceClient: HttpHandler) {
 
-    private val binanceApiSecret = loadProperty(BINANCE_API_SECRET)
-    private val binanceApiKey = loadProperty(BINANCE_API_KEY)
-
-    fun createOrder(orderRequest: CreateOrderRequest): Result4k<BinanceOrderResponse, CryptoTrackerError> {
-        val method = Method.POST
-        val params = mutableMapOf<String, String>()
-
-        // Add required parameters
-        params["symbol"] = orderRequest.symbol
-        params["side"] = orderRequest.side
-        params["type"] = orderRequest.type
-
-        // Add optional parameters
-        orderRequest.timeInForce?.let { params["timeInForce"] = it }
-        orderRequest.quantity?.let { params["quantity"] = it }
-        orderRequest.quoteOrderQty?.let { params["quoteOrderQty"] = it }
-        orderRequest.price?.let { params["price"] = it }
-        orderRequest.newClientOrderId?.let { params["newClientOrderId"] = it }
-
-        val request = buildRequest(method, BINANCE_ORDER_PATH, params)
-        val response = binanceClient(request)
-
-        return when (response.status) {
-            Status.OK -> {
-                try {
-                    val orderResponse = ObjectMapper().registerKotlinModule()
-                        .readValue(response.bodyString(), BinanceOrderResponse::class.java)
-                    Success(orderResponse)
-                } catch (e: Exception) {
-                    Failure(CryptoTrackerError.BinanceError("Failed to parse response: ${e.message}"))
-                }
-            }
-            else -> Failure(CryptoTrackerError.BinanceError(response.bodyString()))
-        }
-    }
-
-    fun getOrdersBySymbol(symbol: String): Result4k<List<Order>, CryptoTrackerError> {
-        val method = Method.GET
-        val params = mutableMapOf<String, String>()
-        params["symbol"] = symbol
-
-        val request = buildRequest(method, BINANCE_ORDERS_PATH, params)
-        val response = binanceClient(request)
-
-        return when (response.status) {
-            Status.OK -> {
-                try {
-                    Success(toOrders(binanceOrdersLens(response)))
-                } catch (e: Exception) {
-                    Failure(CryptoTrackerError.BinanceError("Failed to parse response: ${e.message}"))
-                }
-            }
-            else -> Failure(CryptoTrackerError.BinanceError(response.bodyString()))
-        }
-    }
-
-    private fun buildRequest(
-        method: Method,
-        requestPath: String,
-        requestParams: MutableMap<String, String>
-    ): Request {
-        val timestamp = System.currentTimeMillis().toString()
-        requestParams["timestamp"] = timestamp
-
-        val message = addQueryParams(requestParams).replace("?", "")
-        val signature = buildSignature(binanceApiSecret, message)
-        requestParams["signature"] = signature
-
-        val requestUrl = BINANCE_BASE_URL + requestPath + addQueryParams(requestParams)
-
-        return Request(method, requestUrl)
-            .header("Content-Type", "application/json; charset=utf-8")
-            .header("X-MBX-APIKEY", binanceApiKey)
-    }
-}
-
-
-fun addQueryParams(queryParams: Map<String, String>?): String {
-    val sb = StringBuffer()
-    if (!queryParams.isNullOrEmpty()) {
-        sb.append(EQUALS_SIGN_STRING)
-        sb.append(queryParams.entries.stream()
-            .map { (key, value): Map.Entry<String, String> -> key + EQUALS_STRING + value }
-            .collect(Collectors.joining(AND_STRING)))
-    }
-    return sb.toString()
-}
-
-fun buildSignature(secret: String, message: String): String {
-    val secretKey: ByteArray = secret.toByteArray(StandardCharsets.UTF_8)
-    return try {
-        val mac = Mac.getInstance(HMAC_SHA_256)
-        val secretKeySpec = SecretKeySpec(secretKey, HMAC_SHA_256)
-        mac.init(secretKeySpec)
-        bytesToHex(mac.doFinal(message.toByteArray(StandardCharsets.UTF_8)))
-    } catch (e: Exception) {
-        throw RuntimeException("Failed to calculate hmac-sha256", e)
-    }
-}
-
-fun loadProperty(propertyName: String): String {
-    return System.getenv(propertyName)
-        ?: throw RuntimeException("Missing environment variable: $propertyName")
-}
-
-// Helper function to convert bytes to hex (replace your Hex.hex() function)
-fun bytesToHex(bytes: ByteArray): String {
-    return bytes.joinToString("") { "%02x".format(it) }
-}
-
-fun toOrders(binanceOrders: List<BinanceOrder>): List<Order> {
-    return binanceOrders.map { input ->
-        //val time = if (input.executionTime != input.executionTime) input.executionTime else input.creationTime
-        val order = Order(
-            input.orderId,
-            input.executionTime,
-            input.symbol,
-            input.type,
-            input.side,
-            input.quantity,
-            input.price,
-            input.totalValue,
-            BigDecimal.valueOf(0.0),
-            feeAsset = "",
-            getStatus(input.status.lowercase()),
-            priceFromTrades = false,
-            mutableListOf(),
-            manualImport = false
-        )
-        if (input.status == "PARTIALLY_CANCELED") {
-            order.quantity = input.executedQty
-        }
-        order
-    }
-}
-
-private fun getStatus(input: String): OrderStatus {
-    return when (input) {
-        "filled" -> OrderStatus.FILLED
-        "new" -> OrderStatus.NEW
-        "partially_canceled" -> OrderStatus.PARTIALLY_CANCELED
-        else -> OrderStatus.CANCELED
-    }
-}
