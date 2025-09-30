@@ -8,7 +8,11 @@ import com.blackchain.adapters.BinanceService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.*
-import org.http4k.client.OkHttp
+import org.http4k.client.JavaHttpClient
+import org.http4k.client.JavaHttpClient.invoke
+import org.http4k.core.Uri
+import org.http4k.core.then
+import org.http4k.filter.ClientFilters
 
 
 // Data classes
@@ -49,11 +53,13 @@ data class ApiResponse<T>(
     val error: String? = null
 )
 
+private const val BINANCE_BASE_URL = "https://api.binance.com"
+
 // Main Lambda Handler
 class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private val objectMapper = ObjectMapper().registerKotlinModule()
-    private val binanceClient = OkHttp()
+    private val binanceClient = ClientFilters.SetBaseUriFrom(Uri.of(BINANCE_BASE_URL)).then(JavaHttpClient())
     private val binanceService = BinanceService(binanceClient)
     private lateinit var context: Context
 
@@ -106,7 +112,7 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         val symbol = input.queryStringParameters?.get("symbol")
             ?: return createErrorResponse(400, "Symbol parameter is required")
 
-        val result = binanceService.getOrdersBySymbol(symbol)
+        val result = binanceService.getOrders(symbol)
         println(result.valueOrNull())
         return when (result) {
             is Success -> createSuccessResponse(result.valueOrNull())

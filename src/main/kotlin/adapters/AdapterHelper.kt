@@ -78,25 +78,24 @@ fun bytesToHex(bytes: ByteArray): String {
 fun buildRequest(
     method: Method,
     requestPath: String,
-    requestParams: MutableMap<String, String>
+    requestParams: MutableMap<String, String>,
+    signedRequest: Boolean
 ): Request {
-    val timestamp = System.currentTimeMillis().toString()
-    requestParams["timestamp"] = timestamp
 
-    val message = addQueryParams(requestParams).replace("?", "")
-    val signature = buildSignature(binanceApiSecret, message)
-    requestParams["signature"] = signature
+    if (signedRequest) {
+        val timestamp = System.currentTimeMillis().toString()
+        requestParams["timestamp"] = timestamp
 
-    val requestUrl = BINANCE_BASE_URL + requestPath + addQueryParams(requestParams)
+        val message = addQueryParams(requestParams).replace("?", "")
+        val signature = buildSignature(binanceApiSecret, message)
+        requestParams["signature"] = signature
+    }
 
-    return Request(method, requestUrl)
-        .header("Content-Type", "application/json; charset=utf-8")
-        .header("X-MBX-APIKEY", binanceApiKey)
+    val requestUrl = requestPath + addQueryParams(requestParams)
+    return requestDefinition(method, requestUrl)
 }
 
-fun buildPublicRequest(method: Method, fullRequestURL: String, requestParams: MutableMap<String, String>): Request {
-    val requestUrl = fullRequestURL + addQueryParams(requestParams)
-
+private fun requestDefinition(method: Method, requestUrl: String): Request {
     return Request(method, requestUrl)
         .header("Content-Type", "application/json; charset=utf-8")
         .header("X-MBX-APIKEY", binanceApiKey)

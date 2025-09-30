@@ -34,6 +34,11 @@ data class BinanceOrder(
     val price: BigDecimal
 )
 
+data class SpotPrice(
+    val symbol: String,
+    val price: BigDecimal
+)
+
 enum class OrderStatus {
     FILLED,
     CANCELED,

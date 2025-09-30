@@ -5,7 +5,9 @@ import com.blackchain.CreateOrderRequest
 import com.blackchain.CryptoTrackerError
 import com.blackchain.adapters.domain.BinanceOrder
 import com.blackchain.adapters.domain.Order
+import com.blackchain.adapters.domain.SpotPrice
 import com.blackchain.adapters.domain.toOrders
+import com.blackchain.port.Binance
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.Failure
@@ -16,18 +18,21 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.format.Jackson.auto
+import java.math.BigDecimal
 
 // Constants
 private const val BINANCE_ORDER_PATH = "/api/v3/order"
 private const val BINANCE_ORDERS_PATH = "/api/v3/allOrders"
+private const val BINANCE_SPOT_PRICE = "/api/v3/ticker/price"
 
 //Lenses
 val binanceOrdersLens = Body.auto<List<BinanceOrder>>().toLens()
+val binanceSpotPriceLens = Body.auto<SpotPrice>().toLens()
 
 // Binance Service
-class BinanceService(private val binanceClient: HttpHandler) {
+class BinanceService(private val binanceClient: HttpHandler) : Binance {
 
-    fun createOrder(orderRequest: CreateOrderRequest): Result4k<BinanceOrderResponse, CryptoTrackerError> {
+    override fun createOrder(orderRequest: CreateOrderRequest): Result4k<BinanceOrderResponse, CryptoTrackerError> {
         val method = Method.POST
         val params = mutableMapOf<String, String>()
 
@@ -43,7 +48,7 @@ class BinanceService(private val binanceClient: HttpHandler) {
         orderRequest.price?.let { params["price"] = it }
         orderRequest.newClientOrderId?.let { params["newClientOrderId"] = it }
 
-        val request = buildRequest(method, BINANCE_ORDER_PATH, params)
+        val request = buildRequest(method, BINANCE_ORDER_PATH, params, true)
         val response = binanceClient(request)
 
         return when (response.status) {
@@ -60,12 +65,12 @@ class BinanceService(private val binanceClient: HttpHandler) {
         }
     }
 
-    fun getOrdersBySymbol(symbol: String): Result4k<List<Order>, CryptoTrackerError> {
+    override fun getOrders(symbol: String): Result4k<List<Order>, CryptoTrackerError> {
         val method = Method.GET
         val params = mutableMapOf<String, String>()
         params["symbol"] = symbol
 
-        val request = buildRequest(method, BINANCE_ORDERS_PATH, params)
+        val request = buildRequest(method, BINANCE_ORDERS_PATH, params, true)
         val response = binanceClient(request)
 
         return when (response.status) {
@@ -80,4 +85,20 @@ class BinanceService(private val binanceClient: HttpHandler) {
         }
     }
 
+    override fun getSpotPrice(ticker: String): Result4k<BigDecimal, CryptoTrackerError> {
+        val method = Method.GET
+        val params = mutableMapOf<String, String>()
+        params["symbol"] = ticker
+        val request = buildRequest(method, BINANCE_SPOT_PRICE, params, false)
+        println(request)
+        val response = binanceClient(request)
+        return when (response.status) {
+            Status.OK -> try {
+                Success(binanceSpotPriceLens(response).price)
+            } catch (e: Exception) {
+                Failure(CryptoTrackerError.BinanceError("Failed to parse response: ${e.message}"))
+            }
+            else -> Failure(CryptoTrackerError.BinanceError(response.bodyString()))
+        }
+    }
 }

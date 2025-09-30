@@ -1,6 +1,5 @@
 package adapters
 
-import com.blackchain.adapters.buildPublicRequest
 import com.blackchain.adapters.buildRequest
 import org.http4k.client.JavaHttpClient
 import org.http4k.client.JavaHttpClient.invoke
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test
 
 private const val BINANCE_BASE_URL = "https://testnet.binance.vision"
 private const val BINANCE_ORDER_PATH = "/api/v3/order"
+private const val BINANCE_SPOT_PRICE = "/api/v3/ticker/price"
 
 
 class BinanceServiceTest {
@@ -20,6 +20,9 @@ class BinanceServiceTest {
 
     @Test
     fun `can create a test order a`() {
+
+        println("### PRICE ###")
+        getPrice()
 
         val method = Method.POST
         val params = mutableMapOf<String, String>()
@@ -30,10 +33,7 @@ class BinanceServiceTest {
         params["type"] = "MARKET"
         params["quoteOrderQty"] = "10"
 
-        println("### PRICE ###")
-        getPrice()
-
-        val request = buildRequest(method, BINANCE_ORDER_PATH, params)
+        val request = buildRequest(method, BINANCE_ORDER_PATH, params, true)
         println(request)
 
         val response = binance(request)
@@ -44,7 +44,7 @@ class BinanceServiceTest {
         val method = Method.GET
         val params = mutableMapOf<String, String>()
         params["symbol"] = "BTCEUR"
-        val request = buildPublicRequest(method, "/api/v3/ticker/price", params)
+        val request = buildRequest(method, BINANCE_SPOT_PRICE, params, false)
         println(request)
         val response = binance(request)
         println("PRICE is #: $response")
