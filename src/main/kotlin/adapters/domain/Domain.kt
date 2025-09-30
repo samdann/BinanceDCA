@@ -39,6 +39,30 @@ data class SpotPrice(
     val price: BigDecimal
 )
 
+data class CreateOrderResponse(
+    val symbol: String,
+    val orderId: Long,
+    val price: String,
+    val origQty: String,
+    val executedQty: String,
+    val origQuoteOrderQty: String,
+    @JsonAlias("cummulativeQuoteQty") val cumulativeQuoteQty: String,
+    val status: String,
+    val timeInForce: String,
+    val type: String,
+    val side: String,
+    val workingTime: Long,
+    val fills: List<Fill>
+)
+
+data class Fill(
+    val price: String,
+    val qty: String,
+    val commission: String,
+    val commissionAsset: String,
+    val tradeId: Long
+)
+
 enum class OrderStatus {
     FILLED,
     CANCELED,

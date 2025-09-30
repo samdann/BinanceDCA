@@ -1,15 +1,13 @@
 package com.blackchain.adapters
 
-import com.blackchain.BinanceOrderResponse
 import com.blackchain.CreateOrderRequest
 import com.blackchain.CryptoTrackerError
 import com.blackchain.adapters.domain.BinanceOrder
+import com.blackchain.adapters.domain.CreateOrderResponse
 import com.blackchain.adapters.domain.Order
 import com.blackchain.adapters.domain.SpotPrice
 import com.blackchain.adapters.domain.toOrders
 import com.blackchain.port.Binance
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
@@ -28,11 +26,12 @@ private const val BINANCE_SPOT_PRICE = "/api/v3/ticker/price"
 //Lenses
 val binanceOrdersLens = Body.auto<List<BinanceOrder>>().toLens()
 val binanceSpotPriceLens = Body.auto<SpotPrice>().toLens()
+val binanceCreateOrderLens = Body.auto<CreateOrderResponse>().toLens()
 
 // Binance Service
 class BinanceService(private val binanceClient: HttpHandler) : Binance {
 
-    override fun createOrder(orderRequest: CreateOrderRequest): Result4k<BinanceOrderResponse, CryptoTrackerError> {
+    override fun createOrder(orderRequest: CreateOrderRequest): Result4k<CreateOrderResponse, CryptoTrackerError> {
         val method = Method.POST
         val params = mutableMapOf<String, String>()
 
@@ -49,14 +48,13 @@ class BinanceService(private val binanceClient: HttpHandler) : Binance {
         orderRequest.newClientOrderId?.let { params["newClientOrderId"] = it }
 
         val request = buildRequest(method, BINANCE_ORDER_PATH, params, true)
+        println(request)
         val response = binanceClient(request)
 
         return when (response.status) {
             Status.OK -> {
                 try {
-                    val orderResponse = ObjectMapper().registerKotlinModule()
-                        .readValue(response.bodyString(), BinanceOrderResponse::class.java)
-                    Success(orderResponse)
+                    Success(binanceCreateOrderLens(response))
                 } catch (e: Exception) {
                     Failure(CryptoTrackerError.BinanceError("Failed to parse response: ${e.message}"))
                 }
@@ -90,7 +88,6 @@ class BinanceService(private val binanceClient: HttpHandler) : Binance {
         val params = mutableMapOf<String, String>()
         params["symbol"] = ticker
         val request = buildRequest(method, BINANCE_SPOT_PRICE, params, false)
-        println(request)
         val response = binanceClient(request)
         return when (response.status) {
             Status.OK -> try {

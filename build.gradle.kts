@@ -1,4 +1,3 @@
-
 plugins {
     kotlin("jvm") version "1.9.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -17,9 +16,10 @@ dependencies {
     implementation("com.amazonaws:aws-lambda-java-events:3.11.3")
 
     // Http4k
-    implementation("org.http4k:http4k-core:5.10.2.0")
-    implementation("org.http4k:http4k-client-okhttp:5.10.2.0")
-    implementation("org.http4k:http4k-format-jackson:5.10.2.0")
+    val httpVersion = "5.10.2.0"
+    implementation("org.http4k:http4k-core:${httpVersion}")
+    implementation("org.http4k:http4k-client-okhttp:${httpVersion}")
+    implementation("org.http4k:http4k-format-jackson:${httpVersion}")
 
     // Result4k
     implementation("dev.forkhandles:result4k:2.17.0.0")
@@ -32,6 +32,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.7")
 
     // Test dependencies
+    testImplementation("org.http4k:http4k-testing-strikt:${httpVersion}")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 }
