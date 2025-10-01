@@ -1,8 +1,8 @@
 package com.blackchain.adapters
 
-import com.blackchain.CreateOrderRequest
 import com.blackchain.CryptoTrackerError
 import com.blackchain.adapters.domain.BinanceOrder
+import com.blackchain.adapters.domain.CreateOrderRequest
 import com.blackchain.adapters.domain.CreateOrderResponse
 import com.blackchain.adapters.domain.Order
 import com.blackchain.adapters.domain.SpotPrice
@@ -50,6 +50,7 @@ class BinanceService(private val binanceClient: HttpHandler) : Binance {
         val request = buildRequest(method, BINANCE_ORDER_PATH, params, true)
         println(request)
         val response = binanceClient(request)
+        //println(response)
 
         return when (response.status) {
             Status.OK -> {

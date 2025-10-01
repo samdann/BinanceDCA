@@ -1,7 +1,7 @@
 package com.blackchain.port
 
-import com.blackchain.CreateOrderRequest
 import com.blackchain.CryptoTrackerError
+import com.blackchain.adapters.domain.CreateOrderRequest
 import com.blackchain.adapters.domain.CreateOrderResponse
 import com.blackchain.adapters.domain.Order
 import dev.forkhandles.result4k.Result4k

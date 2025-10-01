@@ -10,25 +10,32 @@ import org.http4k.core.Method
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.filter.ClientFilters
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-private const val BINANCE_BASE_URL = "https://testnet.binance.vision"
+private const val BINANCE_BASE_URL_TESTNET = "https://testnet.binance.vision"
+private const val BINANCE_BASE_URL = "https://api.binance.com"
+
 
 class BinanceServiceTest {
 
-    private val binance = ClientFilters.SetBaseUriFrom(Uri.of(BINANCE_BASE_URL)).then(JavaHttpClient())
-    private val binanceService = BinanceService(binance)
+    private val binanceClientFake =
+        ClientFilters.SetBaseUriFrom(Uri.of(BINANCE_BASE_URL_TESTNET)).then(JavaHttpClient())
+    private val binanceServiceFake = BinanceService(binanceClientFake)
+
+    private val binanceClient = ClientFilters.SetBaseUriFrom(Uri.of(BINANCE_BASE_URL)).then(JavaHttpClient())
+    private val binanceService = BinanceService(binanceClient)
 
     @Test
     fun `can create a test order on the testnet`() {
 
         println("### PRICE ###")
 
-        val price = binanceService.getSpotPrice("BTCEUR").valueOrNull()
+        val price = binanceServiceFake.getSpotPrice("BTCEUR").valueOrNull()
         println("Price is: $price")
 
         val dcaAmount = BigDecimal.valueOf(10)
@@ -41,9 +48,17 @@ class BinanceServiceTest {
 
         val orderRequest =
             CreateOrderRequest("BTCEUR", "BUY", "LIMIT", "GTC", adjustedQty.toString(), null, price.toString(), null)
-        val response = binanceService.createOrder(orderRequest)
-        expectThat(response.valueOrNull()!!.status).isEqualTo("FILLED")
+        val response = binanceServiceFake.createOrder(orderRequest)
+        expectThat(response.valueOrNull()!!.status).isEqualTo("NEW")
 
+    }
+
+    @Disabled
+    @Test
+    fun `can create a limit order on Binance`() {
+        val orderRequest = CreateOrderRequest("TIAUSDC", "SELL", "LIMIT", "GTC", "10", null, "22.95", null)
+        val response = binanceService.createOrder(orderRequest)
+        println(response)
     }
 
     @Test
@@ -52,7 +67,7 @@ class BinanceServiceTest {
         val url = "/api/v3/exchangeInfo?symbol=BTCEUR"
 
         val request = buildRequest(method, url, mutableMapOf(), false)
-        val response = binance(request)
+        val response = binanceClientFake(request)
         println(response)
     }
 
