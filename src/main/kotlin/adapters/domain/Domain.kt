@@ -34,6 +34,18 @@ data class BinanceOrder(
     val price: BigDecimal
 )
 
+data class CreateOrderRequest(
+    val symbol: String,
+    val side: String, // BUY or SELL
+    val type: String, // MARKET, LIMIT, etc.
+    val timeInForce: String? = null, // GTC, IOC, FOK
+    val quantity: String? = null,
+    val quoteOrderQty: String? = null,
+    val price: String? = null,
+    val newClientOrderId: String? = null
+)
+
+
 data class SpotPrice(
     val symbol: String,
     val price: BigDecimal

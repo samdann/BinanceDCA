@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.blackchain.adapters.BinanceService
+import com.blackchain.adapters.domain.CreateOrderRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import dev.forkhandles.result4k.*
@@ -13,34 +14,6 @@ import org.http4k.client.JavaHttpClient.invoke
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.filter.ClientFilters
-
-
-// Data classes
-data class CreateOrderRequest(
-    val symbol: String,
-    val side: String, // BUY or SELL
-    val type: String, // MARKET, LIMIT, etc.
-    val timeInForce: String? = null, // GTC, IOC, FOK
-    val quantity: String? = null,
-    val quoteOrderQty: String? = null,
-    val price: String? = null,
-    val newClientOrderId: String? = null
-)
-
-data class BinanceOrderResponse(
-    val symbol: String,
-    val orderId: Long,
-    val clientOrderId: String,
-    val transactTime: Long,
-    val price: String,
-    val origQty: String,
-    val executedQty: String,
-    val status: String,
-    val timeInForce: String?,
-    val type: String,
-    val side: String
-)
-
 
 sealed class CryptoTrackerError {
     data class BinanceError(val message: String) : CryptoTrackerError()
@@ -74,7 +47,7 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
             context.logger.log("Received ${input.httpMethod} request to ${input.path}")
 
             when (input.httpMethod) {
-                "POST" -> handleCreateOrder(input)
+                "POST" -> handleCreateDCAOrder(input)
                 "GET" -> handleGetOrders(input)
                 else -> createErrorResponse(405, "Method not allowed")
             }
@@ -93,7 +66,9 @@ class BinanceOrderHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         }
     }
 
-    private fun handleCreateOrder(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
+    //private fun handleCreateDAC
+
+    private fun handleCreateDCAOrder(input: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent {
         val requestBody = input.body ?: return createErrorResponse(400, "Request body is required")
 
         val orderRequest = try {

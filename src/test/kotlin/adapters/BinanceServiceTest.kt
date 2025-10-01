@@ -1,8 +1,8 @@
 package adapters
 
-import com.blackchain.CreateOrderRequest
 import com.blackchain.adapters.BinanceService
 import com.blackchain.adapters.buildRequest
+import com.blackchain.adapters.domain.CreateOrderRequest
 import dev.forkhandles.result4k.valueOrNull
 import org.http4k.client.JavaHttpClient
 import org.http4k.client.JavaHttpClient.invoke
