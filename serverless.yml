@@ -33,6 +33,7 @@ functions:
           method: get
           cors: true
 
+
   dcaOrder:
     handler: com.blackchain.DCAOrderHandler::handleRequest
     events:

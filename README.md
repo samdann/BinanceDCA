@@ -23,3 +23,9 @@ whitelist IP address in API_Key
 ```
 curl https://api.ipify.org
 ```
+
+invoke a cron (Rule on EventBridge) with serverless
+
+```
+serverless invoke --function dcaOrder --stage prod --log
+```
