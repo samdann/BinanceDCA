@@ -1,13 +1,25 @@
-package com.blackchain.adapters
+package com.blackchain.com.blackchain.core.adapters
+
 
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Request.Companion.invoke
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import kotlin.collections.isNullOrEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.set
+import kotlin.collections.toMutableMap
+import kotlin.io.forEachLine
+import kotlin.text.format
+import kotlin.text.isNotEmpty
+import kotlin.text.replace
+import kotlin.text.split
+import kotlin.text.startsWith
+import kotlin.text.toByteArray
+import kotlin.text.trim
 
 // Constants
 private const val HMAC_SHA_256 = "HmacSHA256"
@@ -48,7 +60,7 @@ fun buildSignature(secret: String, message: String): String {
 
 fun loadProperty(propertyName: String): String {
     val envVars = loadEnvironmentVariables()
-    return envVars[propertyName] ?: throw Exception("Missing variable $propertyName")
+    return envVars[propertyName] ?: throw java.lang.Exception("Missing variable $propertyName")
 
 }
 

@@ -1,7 +1,8 @@
-package com.blackchain.adapters.domain
+package com.blackchain.com.blackchain.core.adapters.domain
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import java.math.BigDecimal
+import kotlin.collections.map
+import kotlin.text.lowercase
 
 data class Order(
     val orderId: String,
@@ -23,14 +24,14 @@ data class Order(
 data class BinanceOrder(
     val symbol: String,
     val orderId: String,
-    @JsonAlias("origQty") val quantity: BigDecimal,
-    @JsonAlias("executedQty") val executedQty: BigDecimal,
-    @JsonAlias("cummulativeQuoteQty") val totalValue: BigDecimal,
+    @com.fasterxml.jackson.annotation.JsonAlias("origQty") val quantity: BigDecimal,
+    @com.fasterxml.jackson.annotation.JsonAlias("executedQty") val executedQty: BigDecimal,
+    @com.fasterxml.jackson.annotation.JsonAlias("cummulativeQuoteQty") val totalValue: BigDecimal,
     val type: String,
     val side: String,
     val status: String,
-    @JsonAlias("time") val creationTime: Long,
-    @JsonAlias("updateTime") val executionTime: Long,
+    @com.fasterxml.jackson.annotation.JsonAlias("time") val creationTime: Long,
+    @com.fasterxml.jackson.annotation.JsonAlias("updateTime") val executionTime: Long,
     val price: BigDecimal
 )
 
@@ -58,7 +59,7 @@ data class CreateOrderResponse(
     val origQty: String,
     val executedQty: String,
     val origQuoteOrderQty: String,
-    @JsonAlias("cummulativeQuoteQty") val cumulativeQuoteQty: String,
+    @com.fasterxml.jackson.annotation.JsonAlias("cummulativeQuoteQty") val cumulativeQuoteQty: String,
     val status: String,
     val timeInForce: String,
     val type: String,
@@ -85,7 +86,6 @@ enum class OrderStatus {
 
 fun toOrders(binanceOrders: List<BinanceOrder>): List<Order> {
     return binanceOrders.map { input ->
-        //val time = if (input.executionTime != input.executionTime) input.executionTime else input.creationTime
         val order = Order(
             input.orderId,
             input.executionTime,
@@ -99,7 +99,7 @@ fun toOrders(binanceOrders: List<BinanceOrder>): List<Order> {
             feeAsset = "",
             getStatus(input.status.lowercase()),
             priceFromTrades = false,
-            mutableListOf(),
+            kotlin.collections.mutableListOf(),
             manualImport = false
         )
         if (input.status == "PARTIALLY_CANCELED") {
@@ -116,4 +116,9 @@ private fun getStatus(input: String): OrderStatus {
         "partially_canceled" -> OrderStatus.PARTIALLY_CANCELED
         else -> OrderStatus.CANCELED
     }
+}
+
+sealed class CryptoTrackerError {
+    data class BinanceError(val message: String) : CryptoTrackerError()
+    data class ValidationError(val message: String) : CryptoTrackerError()
 }

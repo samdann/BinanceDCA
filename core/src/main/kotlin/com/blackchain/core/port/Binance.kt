@@ -1,9 +1,9 @@
-package com.blackchain.port
+package com.blackchain.com.blackchain.core.port
 
-import com.blackchain.CryptoTrackerError
-import com.blackchain.adapters.domain.CreateOrderRequest
-import com.blackchain.adapters.domain.CreateOrderResponse
-import com.blackchain.adapters.domain.Order
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderResponse
+import com.blackchain.com.blackchain.core.adapters.domain.CryptoTrackerError
+import com.blackchain.com.blackchain.core.adapters.domain.Order
 import dev.forkhandles.result4k.Result4k
 import java.math.BigDecimal
 

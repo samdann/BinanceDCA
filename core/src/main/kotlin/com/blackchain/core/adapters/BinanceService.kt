@@ -1,13 +1,13 @@
-package com.blackchain.adapters
+package com.blackchain.com.blackchain.core.adapters
 
-import com.blackchain.CryptoTrackerError
-import com.blackchain.adapters.domain.BinanceOrder
-import com.blackchain.adapters.domain.CreateOrderRequest
-import com.blackchain.adapters.domain.CreateOrderResponse
-import com.blackchain.adapters.domain.Order
-import com.blackchain.adapters.domain.SpotPrice
-import com.blackchain.adapters.domain.toOrders
-import com.blackchain.port.Binance
+import com.blackchain.com.blackchain.core.adapters.domain.BinanceOrder
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderResponse
+import com.blackchain.com.blackchain.core.adapters.domain.CryptoTrackerError
+import com.blackchain.com.blackchain.core.adapters.domain.Order
+import com.blackchain.com.blackchain.core.adapters.domain.SpotPrice
+import com.blackchain.com.blackchain.core.adapters.domain.toOrders
+import com.blackchain.com.blackchain.core.port.Binance
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
@@ -17,6 +17,7 @@ import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.format.Jackson.auto
 import java.math.BigDecimal
+
 
 // Constants
 private const val BINANCE_ORDER_PATH = "/api/v3/order"

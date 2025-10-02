@@ -1,8 +1,8 @@
 package adapters
 
-import com.blackchain.adapters.BinanceService
-import com.blackchain.adapters.buildRequest
-import com.blackchain.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.adapters.BinanceService
+import com.blackchain.com.blackchain.core.adapters.buildRequest
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
 import dev.forkhandles.result4k.valueOrNull
 import org.http4k.client.JavaHttpClient
 import org.http4k.client.JavaHttpClient.invoke
@@ -48,8 +48,8 @@ class BinanceServiceTest {
 
         val orderRequest =
             CreateOrderRequest("BTCEUR", "BUY", "LIMIT", "GTC", adjustedQty.toString(), null, price.toString(), null)
-        val response = binanceServiceFake.createOrder(orderRequest)
-        expectThat(response.valueOrNull()!!.status).isEqualTo("NEW")
+        val orderResponse = binanceServiceFake.createOrder(orderRequest)
+        expectThat(orderResponse.valueOrNull()!!.status).isEqualTo("NEW")
 
     }
 

@@ -1,10 +1,11 @@
-package com.blackchain
+package com.blackchain.lambda
+
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.ScheduledEvent
-import com.blackchain.adapters.BinanceService
-import com.blackchain.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.adapters.BinanceService
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
 import dev.forkhandles.result4k.valueOrNull
@@ -15,6 +16,11 @@ import org.http4k.core.then
 import org.http4k.filter.ClientFilters
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.minus
+import kotlin.plus
+import kotlin.stackTraceToString
+import kotlin.toBigDecimal
+import kotlin.toString
 
 private const val BINANCE_BASE_URL = "https://api.binance.com"
 
