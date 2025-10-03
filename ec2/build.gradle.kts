@@ -33,6 +33,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
+
 tasks.shadowJar {
     archiveBaseName.set("binance-ec2-dca")
     archiveVersion.set("1.0.0")

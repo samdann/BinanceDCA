@@ -1,0 +1,16 @@
+[Unit]
+Description=Binance DCA Order Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=ec2-user
+WorkingDirectory=/home/ec2-user/binance-dca
+EnvironmentFile=/home/ec2-user/binance-dca/.env
+ExecStart=/usr/bin/java -jar /home/ec2-user/binance-dca/binance-ec2-dca-1.0.0-all.jar
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=binance-dca
+
+[Install]
+WantedBy=multi-user.target
