@@ -1,0 +1,76 @@
+#
+# CONFIGURATION:
+# Edit the email addresses below, then run: ./deploy-monitoring.sh
+# EMAIL_ADDRESSES: danver_k@hotmail.com
+#
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch monitoring and alerting for Binance DCA Order Service'
+
+Parameters:
+  PrimaryEmailAddress:
+    Type: String
+    Description: Email address to receive error alerts
+    Default: sami.dannoune@gmail.com
+
+  LogGroupName:
+    Type: String
+    Description: CloudWatch Log Group name
+    Default: /aws/ec2/binance-dca
+
+  AlarmThreshold:
+    Type: Number
+    Description: Number of errors to trigger alarm
+    Default: 1
+
+Resources:
+  # SNS Topic for error notifications
+  ErrorAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: binance-dca-errors
+      DisplayName: Binance DCA Error Alerts
+      Subscription:
+        - Endpoint: !Ref PrimaryEmailAddress
+          Protocol: email
+
+  # Metric Filter to count errors in logs
+  ErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref LogGroupName
+      FilterName: BinanceDCAErrors
+      # Pattern matches lines with ERROR, Exception, or Failed
+      FilterPattern: '"DCA order failed"'
+      MetricTransformations:
+        - MetricName: ErrorCount
+          MetricNamespace: BinanceDCA
+          MetricValue: '1'
+          DefaultValue: 0
+
+  # CloudWatch Alarm for errors
+  ErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: binance-dca-error-alarm
+      AlarmDescription: Alert when errors occur in Binance DCA Order Service
+      MetricName: ErrorCount
+      Namespace: BinanceDCA
+      Statistic: Sum
+      Period: 300  # 5 minutes
+      EvaluationPeriods: 1
+      Threshold: !Ref AlarmThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref ErrorAlertTopic
+      TreatMissingData: notBreaching
+
+Outputs:
+  SNSTopicArn:
+    Description: ARN of the SNS topic for error alerts
+    Value: !Ref ErrorAlertTopic
+    Export:
+      Name: BinanceDCA-ErrorTopic
+
+  ErrorAlarmArn:
+    Description: ARN of the error alarm
+    Value: !GetAtt ErrorAlarm.Arn
