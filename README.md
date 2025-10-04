@@ -111,7 +111,7 @@ ssh ec2-user@your-elastic-ip 'sudo journalctl -u binance-dca -f'
 
 or could be streamed to CloudWatch
 
-### Run manually (test)
+nan### Run manually (test)
 
 ```bash
 ssh ec2-user@your-elastic-ip 'sudo systemctl start binance-dca'
