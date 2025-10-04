@@ -52,7 +52,12 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: binance-dca-error-alarm
-      AlarmDescription: Alert when errors occur in Binance DCA Order Service
+      AlarmDescription: |
+        BINANCE DCA SERVICE ERROR DETECTED
+        
+        An error has occurred in your Binance DCA order service.
+        Time of the order execution: {timestamp}
+
       MetricName: ErrorCount
       Namespace: BinanceDCA
       Statistic: Sum
