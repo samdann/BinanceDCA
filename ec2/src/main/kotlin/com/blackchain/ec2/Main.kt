@@ -43,9 +43,10 @@ fun main() {
 
 fun getCreateOrderRequest(binanceService: BinanceService): CreateOrderRequest {
     val pair = "BTCEUR"
+    val amount = 20L
     val price = binanceService.getSpotPrice(pair).valueOrNull()
 
-    val dcaAmount = BigDecimal.valueOf(10)
+    val dcaAmount = BigDecimal.valueOf(amount)
     val quantity = dcaAmount.divide(price, 8, RoundingMode.HALF_DOWN)
     val minSize = BigDecimal.valueOf(0.0001)
     val stepSize = BigDecimal.valueOf(0.00001)
