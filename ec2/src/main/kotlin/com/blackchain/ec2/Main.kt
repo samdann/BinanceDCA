@@ -2,6 +2,7 @@ package com.blackchain.ec2
 
 import com.blackchain.com.blackchain.core.adapters.BinanceService
 import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.application.mail.sendEmail
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
 import dev.forkhandles.result4k.valueOrNull
@@ -17,7 +18,7 @@ import java.time.Instant
 private const val BINANCE_BASE_URL = "https://api.binance.com"
 
 
-fun main() {
+suspend fun main() {
     println("=== Binance DCA Order Execution ===")
     println("Timestamp: ${Instant.now()}")
 
@@ -33,6 +34,9 @@ fun main() {
         is Success -> {
             println("DCA order successful: ${result.value}")
             "SUCCESS: Order ${result.value.orderId} created. Bought ${result.value.executedQty} BTC"
+            val report =
+                "Your daily DCA order of Bitcoin has been successfully executed: ${result.value.executedQty} BTC bought for ${result.value.cumulativeQuoteQty}€ at a price of ${result.value.price}€"
+            sendEmail(report)
         }
         is Failure -> {
             println("DCA order failed: ${result.reason}")

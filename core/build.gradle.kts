@@ -25,6 +25,9 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-simple:2.0.7")
 
+    // Email
+    implementation("aws.sdk.kotlin:ses:1.0.0")
+
     // Test dependencies
     testImplementation("org.http4k:http4k-testing-strikt:${httpVersion}")
     testImplementation(kotlin("test"))
