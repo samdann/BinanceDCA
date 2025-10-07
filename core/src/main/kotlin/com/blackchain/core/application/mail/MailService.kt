@@ -15,7 +15,7 @@ suspend fun sendEmail(report: String) {
 
     SesClient { region = confRegion }.use { ses ->
         ses.sendEmail(SendEmailRequest {
-            source = "no-reply@binance-dca.com"
+            source = "sami.dannoune@gmail.com"
             destination = Destination {
                 toAddresses = recipients
             }
