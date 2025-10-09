@@ -3,7 +3,6 @@ Description=Daily Binance DCA Order Timer
 Requires=binance-dca.service
 
 [Timer]
-OnCalendar=daily
 # Run at 6:00 AM UTC daily
 OnCalendar=*-*-* 06:00:00
 Persistent=true
