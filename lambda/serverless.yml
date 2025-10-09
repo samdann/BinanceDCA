@@ -1,4 +1,4 @@
-service: binance-order-service
+service: binance-lambda
 
 provider:
   name: aws
@@ -22,7 +22,7 @@ provider:
 
 functions:
   binanceOrder:
-    handler: com.blackchain.BinanceOrderHandler::handleRequest
+    handler: com.blackchain.lambda.BinanceOrderHandler::handleRequest
     events:
       - http:
           path: /orders
@@ -33,14 +33,6 @@ functions:
           method: get
           cors: true
 
-
-  dcaOrder:
-    handler: com.blackchain.DCAOrderHandler::handleRequest
-    events:
-      - schedule:
-          rate: cron(0 6 * * ? *)  # Daily at 9:00 AM UTC
-          description: "Daily DCA order to buy BTC"
-          enabled: true
 
 package:
   artifact: build/libs/${self:service}-1.0.0-all.jar

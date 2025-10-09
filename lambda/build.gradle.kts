@@ -33,6 +33,9 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+kotlin {
+    jvmToolchain(17)
+}
 tasks.shadowJar {
     archiveBaseName.set("binance-lambda")
     archiveVersion.set("1.0.0")

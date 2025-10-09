@@ -13,7 +13,7 @@ fi
 
 # Build the project
 echo "📦 Building the project..."
-./gradlew clean shadowJar
+cd .. && ./gradlew clean :lambda:shadowJar && cd lambda
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed!"
