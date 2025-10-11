@@ -5,12 +5,15 @@ import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
 import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderResponse
 import com.blackchain.com.blackchain.core.adapters.domain.CryptoTrackerError
 import com.blackchain.com.blackchain.core.adapters.domain.Order
+import com.blackchain.com.blackchain.core.adapters.domain.OrderStatus
 import com.blackchain.com.blackchain.core.adapters.domain.SpotPrice
 import com.blackchain.com.blackchain.core.adapters.domain.toOrders
+import com.blackchain.com.blackchain.core.application.formatNumber
 import com.blackchain.com.blackchain.core.port.Binance
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
+import dev.forkhandles.result4k.valueOrNull
 import org.http4k.core.Body
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -65,10 +68,10 @@ class BinanceService(private val binanceClient: HttpHandler) : Binance {
         }
     }
 
-    override fun getOrders(symbol: String): Result4k<List<Order>, CryptoTrackerError> {
+    override fun getOrders(pair: String): Result4k<List<Order>, CryptoTrackerError> {
         val method = Method.GET
         val params = mutableMapOf<String, String>()
-        params["symbol"] = symbol
+        params["symbol"] = pair
 
         val request = buildRequest(method, BINANCE_ORDERS_PATH, params, true)
         val response = binanceClient(request)
@@ -99,5 +102,19 @@ class BinanceService(private val binanceClient: HttpHandler) : Binance {
             }
             else -> Failure(CryptoTrackerError.BinanceError(response.bodyString()))
         }
+    }
+
+    override fun getOrdersSummary(pair: String): String {
+        var execution = 0
+        var amount = BigDecimal.ZERO
+        var cost = BigDecimal.ZERO
+        getOrders(pair).valueOrNull()!!.filter { it.status == OrderStatus.FILLED }.forEach { order ->
+            execution++
+            amount += order.quantity
+            cost += order.totalValue
+        }
+        return "$execution buy orders executed for a purchased amount of ${
+            formatNumber(amount, 4)
+        }BTC for a total cost of ${formatNumber(cost, 2)}€"
     }
 }

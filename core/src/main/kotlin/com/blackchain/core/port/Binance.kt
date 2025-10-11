@@ -10,6 +10,7 @@ import java.math.BigDecimal
 interface Binance {
 
     fun createOrder(orderRequest: CreateOrderRequest): Result4k<CreateOrderResponse, CryptoTrackerError>
-    fun getOrders(symbol: String): Result4k<List<Order>, CryptoTrackerError>
-    fun getSpotPrice(ticker: String): Result4k<BigDecimal, CryptoTrackerError>
+    fun getOrders(pair: String): Result4k<List<Order>, CryptoTrackerError>
+    fun getSpotPrice(pair: String): Result4k<BigDecimal, CryptoTrackerError>
+    fun getOrdersSummary(pair: String): String
 }

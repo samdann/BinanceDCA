@@ -3,7 +3,6 @@ package com.blackchain.com.blackchain.core.adapters
 
 import org.http4k.core.Method
 import org.http4k.core.Request
-import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 import javax.crypto.Mac
@@ -12,14 +11,9 @@ import kotlin.collections.isNullOrEmpty
 import kotlin.collections.joinToString
 import kotlin.collections.set
 import kotlin.collections.toMutableMap
-import kotlin.io.forEachLine
 import kotlin.text.format
-import kotlin.text.isNotEmpty
 import kotlin.text.replace
-import kotlin.text.split
-import kotlin.text.startsWith
 import kotlin.text.toByteArray
-import kotlin.text.trim
 
 // Constants
 private const val HMAC_SHA_256 = "HmacSHA256"
@@ -68,16 +62,16 @@ fun loadEnvironmentVariables(): Map<String, String> {
     val envVars = System.getenv().toMutableMap()
 
     // Check if we are running locally (check for .env file)
-    val envFile = File(".env")
-    if (envFile.exists()) {
-        envFile.forEachLine { line ->
-            val trimmedLine = line.trim()
-            if (trimmedLine.isNotEmpty() && !trimmedLine.startsWith("#")) {
-                val (key, value) = trimmedLine.split("=")
-                envVars[key.trim()] = value.trim()
-            }
-        }
-    }
+//    val envFile = File(".env")
+//    if (envFile.exists()) {
+//        envFile.forEachLine { line ->
+//            val trimmedLine = line.trim()
+//            if (trimmedLine.isNotEmpty() && !trimmedLine.startsWith("#")) {
+//                val (key, value) = trimmedLine.split("=")
+//                envVars[key.trim()] = value.trim()
+//            }
+//        }
+//    }
 
     return envVars
 }

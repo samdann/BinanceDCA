@@ -2,6 +2,9 @@ package com.blackchain.ec2
 
 import com.blackchain.com.blackchain.core.adapters.BinanceService
 import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderRequest
+import com.blackchain.com.blackchain.core.adapters.domain.CreateOrderResponse
+import com.blackchain.com.blackchain.core.application.convertToReadableDate
+import com.blackchain.com.blackchain.core.application.formatNumber
 import com.blackchain.com.blackchain.core.application.mail.sendEmail
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
@@ -25,6 +28,8 @@ suspend fun main() {
     val binanceClient = ClientFilters.SetBaseUriFrom(Uri.of(BINANCE_BASE_URL)).then(JavaHttpClient())
     val binanceService = BinanceService(binanceClient)
 
+    val pair = "BTCEUR"
+
     val orderRequest = getCreateOrderRequest(binanceService)
     println("Creating DCA order: $orderRequest")
 
@@ -34,9 +39,10 @@ suspend fun main() {
         is Success -> {
             println("DCA order successful: ${result.value}")
             "SUCCESS: Order ${result.value.orderId} created. Bought ${result.value.executedQty} BTC"
-            val report =
-                "Your daily DCA order of Bitcoin has been successfully executed: ${result.value.executedQty} BTC bought for ${result.value.cumulativeQuoteQty}€ at a price of ${result.value.price}€"
-            sendEmail(report)
+            var executionReport =
+                generateEmailBody(result)
+            var holdingsReport = binanceService.getOrdersSummary(pair)
+            sendEmail(executionReport + holdingsReport)
         }
         is Failure -> {
             println("DCA order failed: ${result.reason}")
@@ -44,6 +50,14 @@ suspend fun main() {
         }
     }
 }
+
+private fun generateEmailBody(result: Success<CreateOrderResponse>): String {
+
+    return "Your daily DCA order of Bitcoin has been successfully executed on ${convertToReadableDate(result.value.workingTime)}: \n ${
+        formatNumber(result.value.executedQty.toBigDecimal(), 4)
+    }BTC bought for ${result.value.cumulativeQuoteQty}€ at a price of ${result.value.price}€ per coin."
+}
+
 
 fun getCreateOrderRequest(binanceService: BinanceService): CreateOrderRequest {
     val pair = "BTCEUR"
